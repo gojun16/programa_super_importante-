@@ -50,7 +50,7 @@ def janela_de_listas():
         # Se não tiver dados, exibe uma mensagem
         sem_dados_label = ctk.CTkLabel(frame_listas, text="Nenhum produto encontrado", font=("Arial", 16))
         sem_dados_label.pack(pady=20)
-    abrir_cadastro = ctk.CTkButton(janela,text="abrir jenela de cadastro",width=100,height=100,command=janela_cadastro())
+    abrir_cadastro = ctk.CTkButton(janela,text="abrir jenela de cadastro",width=100,height=100,command=janela_cadastro)
     abrir_cadastro.pack(padx=20,pady=20)
     janela.mainloop()
 
@@ -76,6 +76,8 @@ def janela_cadastro():
     lote_label =  ctk.CTkEntry(info_frame,placeholder_text="lote do produto",textvariable=numero)
     notafiscal_label =  ctk.CTkEntry(info_frame,placeholder_text="nota fiscal do produto"textvariable=numero)
     validade_label =  ctk.CTkEntry(info_frame,placeholder_text="validade do produto Ex:18092025")
+    cadastro_janela.mainloop()
 
 janela_de_listas()
+
 
