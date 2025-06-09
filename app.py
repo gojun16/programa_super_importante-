@@ -1,11 +1,13 @@
 import customtkinter as ctk
 import sqlite3
 from datetime import datetime
+from PIL import Image
 
 conn = sqlite3.connect('database.db')
 cursor = conn.cursor()
 
 def janela_cadastro():
+
     cadastro_janela = ctk.CTkToplevel()
     cadastro_janela.title("Cadastre o item")
     cadastro_janela.geometry("600x400")
@@ -21,10 +23,11 @@ def janela_cadastro():
             # Tenta converter a validade para ISO, validando formato
             data_iso = datetime.strptime(validade, "%d%m%Y").date().isoformat()
 
-            cursor.execute("INSERT INTO produtos (nome, lote, nota_fiscal, validade) VALUES (?, ?, ?, ?, ?)",
+            cursor.execute("INSERT INTO produtos (nome, lote, nota_fiscal, validade, quantidade) VALUES (?, ?, ?, ?, ?)",
                            (nome, lote, nota, data_iso, quantidade))
             conn.commit()
             print("Produto cadastrado com sucesso.")
+            atualizar_lista()
             cadastro_janela.destroy()
 
         except ValueError:
@@ -50,49 +53,73 @@ def janela_cadastro():
 
     confirmar_button = ctk.CTkButton(info_frame, text="Cadastrar", command=cadastrar)
     confirmar_button.grid(row=5, column=0, padx=10, pady=15)
+    
+
+
+
+
+janela = ctk.CTk()
+janela.title("Listas dos Produtos")
+janela.geometry('800x600')
+frame_listas = ctk.CTkFrame(janela)
+frame_listas.grid(row=0, column=0, padx=20, pady=20)
 
 def janela_de_listas():
+   
+
     cursor.execute("SELECT nome, lote, nota_fiscal, validade, quantidade FROM produtos")
     lista = cursor.fetchall()
 
-    janela = ctk.CTk()
-    janela.title("Lista dos Produtos")
-    janela.geometry('1000x600')
-    janela.attributes('-fullscreen', True)
-
-    frame_listas = ctk.CTkFrame(master=janela)
-    frame_listas.grid(row=0, column=0, padx=20, pady=20)
-
     # Cabeçalhos
-    headers = ["Nome", "Lote", "Nota Fiscal", "Validade, Quantidade"]
+    headers = ["Nome", "Lote", "Nota Fiscal", "Validade", "Quantidade"]
     for idx, title in enumerate(headers):
         cabecalho = ctk.CTkLabel(frame_listas, text=title, font=("Arial", 14, "bold"))
         cabecalho.grid(row=0, column=idx, padx=10, pady=10, sticky="w")
 
     if lista:
         for i, (nome, lote, nota_fiscal, validade, quantidade) in enumerate(lista, start=1):
-            nome_label = ctk.CTkLabel(frame_listas, text=nome)
-            nome_label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
-
-            lote_label = ctk.CTkLabel(frame_listas, text=lote)
-            lote_label.grid(row=i, column=1, padx=10, pady=5, sticky="w")
-
-            nota_label = ctk.CTkLabel(frame_listas, text=nota_fiscal)
-            nota_label.grid(row=i, column=2, padx=10, pady=5, sticky="w")
-
-            validade_label = ctk.CTkLabel(frame_listas, text=validade)
-            validade_label.grid(row=i, column=3, padx=10, pady=5, sticky="w")
-
-            quantidade_label = ctk.CTkLabel(frame_listas, text=quantidade)
-            quantidade_label.grid(row=i, column=4, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=nome).grid(row=i, column=0, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=lote).grid(row=i, column=1, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=nota_fiscal).grid(row=i, column=2, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=validade).grid(row=i, column=3, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=quantidade).grid(row=i, column=4, padx=10, pady=5, sticky="w")
     else:
         sem_dados_label = ctk.CTkLabel(frame_listas, text="Nenhum produto encontrado", font=("Arial", 16))
-        sem_dados_label.grid(row=1, column=0, columnspan=4, pady=20)
+        sem_dados_label.grid(row=1, column=0, columnspan=5, pady=20)
 
-    abrir_cadastro = ctk.CTkButton(janela, text="Abrir janela de cadastro", width=200, height=50, command=janela_cadastro)
-    abrir_cadastro.grid(row=1, column=0, pady=20)
+abrir_cadastro = ctk.CTkButton(janela, text="Abrir janela de cadastro", width=200, height=50, command=janela_cadastro)
+abrir_cadastro.grid(row=1, column=0, pady=20)
 
-    janela.mainloop()
 
-# Iniciar a aplicação
-janela_de_listas()
+def atualizar_lista():
+    global frame_listas
+    for widget in frame_listas.winfo_children():
+        widget.destroy()
+
+    cursor.execute("SELECT nome, lote, nota_fiscal, validade, quantidade FROM produtos")
+    lista = cursor.fetchall()
+
+    # Cabeçalhos
+    headers = ["Nome", "Lote", "Nota Fiscal", "Validade", "Quantidade"]
+    for idx, title in enumerate(headers):
+        cabecalho = ctk.CTkLabel(frame_listas, text=title, font=("Arial", 14, "bold"))
+        cabecalho.grid(row=1, column=idx, padx=10, pady=10, sticky="w")
+
+    if lista:
+        for i, (nome, lote, nota_fiscal, validade, quantidade) in enumerate(lista, start=1):
+            ctk.CTkLabel(frame_listas, text=nome).grid(row=i, column=0, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=lote).grid(row=i, column=1, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=nota_fiscal).grid(row=i, column=2, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=validade).grid(row=i, column=3, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(frame_listas, text=quantidade).grid(row=i, column=4, padx=10, pady=5, sticky="w")
+            pass
+    else:
+       sem_dados_label = ctk.CTkLabel(frame_listas, text="Nenhum produto encontrado", font=("Arial", 16))
+       sem_dados_label.grid(row=1, column=0, columnspan=5, pady=20)
+    pass
+refresh_img = ctk.CTkImage(Image.open("Refresh_icon.png"),size=(30,30))
+botao_refresh = ctk.CTkButton(janela, text="", command=atualizar_lista,image=refresh_img,width=30,height=30)
+botao_refresh.grid(row=0, column=4, columnspan=2, padx=10, pady=10, sticky="e")
+
+janela_de_listas()  # chama para montar a lista na inicialização
+janela.mainloop()
